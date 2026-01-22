@@ -1,0 +1,20 @@
+size of buffer must be divisible by 4 (to avoid overflow/underflow)
+size of buffer must be determined before computations with it and cannot be changed
+buffer will use pop (-) and push (+)
+use circular buffer --> FIFO, if full, oldest is removed and overwritten with new
+buffer implementation given --> but need to implement "Before pushing or popping data, always ensure that the buffer is not full and not
+empty"
+input ---> linear buffer ---> circular buffer // first use a linear buffer to store the input, then read from the linear buffer to send the data to the circular buffer
+
+goals: 
+1. make program that takes input of numbers (text or binary) and output the sum of the numbers (ints)
+2. compare wall-clock times for both bin and text files in the different buffer sizes given (see theory 2 file or use time)
+3. Answer the questions given (see pdf)
+4. Submit zip with src, pdf with answers, txt file with names and NIA, bash file with terminal commands
+
+so, expected output:
+
+buffer size     |       text time       |       binary time
+size1                   txtTime1                binTime1
+size2                   txtTime2                binTime2
+size3 ....
