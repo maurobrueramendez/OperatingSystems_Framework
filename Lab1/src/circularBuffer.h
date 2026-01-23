@@ -20,3 +20,14 @@ int buffer_free_bytes(CircularBuffer* buffer);
 void buffer_push(CircularBuffer* buffer, unsigned char c);
 unsigned char buffer_pop(CircularBuffer* buffer);
 int buffer_size_next_element(CircularBuffer* buffer, unsigned char delimeter, int reachedEOF);
+
+//file reading
+typedef struct {
+    unsigned char * data;
+    int size;
+    int capacity;
+} LinearBuffer;
+
+LinearBuffer* read_text_file(const char* filename);
+LinearBuffer* read_binary_file(const char* filename);
+void linear_buffer_free(LinearBuffer* buffer);

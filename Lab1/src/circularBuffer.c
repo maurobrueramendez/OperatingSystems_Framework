@@ -1,4 +1,6 @@
 #include "circularBuffer.h"
+#include <fcntl.h>
+#include <string.h>
 
 int buffer_init(CircularBuffer* buffer, int size)  {
     buffer->data = malloc(size +1 );
@@ -78,4 +80,129 @@ unsigned char buffer_pop(CircularBuffer* buffer) {
     unsigned char ret = buffer->data[buffer->start];
     buffer->start= (buffer->start + 1)%buffer->size;
     return ret;
+}
+
+//1. file reading
+LinearBuffer* read_text_file(const char* filename) {
+    int fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        perror("Error opening text file");
+        return NULL;
+    }
+
+    LinearBuffer *buffer = (LinearBuffer *)malloc(sizeof(LinearBuffer));
+    if (buffer == NULL) {
+        perror("Error allocating LinearBuffer");
+        close(fd);
+        return NULL;
+    }
+
+    buffer->capacity = 4096;
+    buffer->data = (unsigned char *)malloc(buffer->capacity);
+    if (buffer->data == NULL) {
+        perror("Error allocating buffer data");
+        free(buffer);
+        close(fd);
+        return NULL;
+    }
+
+    buffer->size = 0;
+    unsigned char read_buf[512];
+    int bytes_read;
+
+    while ((bytes_read = read(fd, read_buf, sizeof(read_buf))) > 0) {
+        for (int i = 0; i < bytes_read; i++) {
+            if (buffer->size >= buffer->capacity) {
+                buffer->capacity *= 2;
+                unsigned char *temp = (unsigned char *)realloc(buffer->data, buffer->capacity);
+                if (temp == NULL) {
+                    perror("Error reallocating buffer");
+                    free(buffer->data);
+                    free(buffer);
+                    close(fd);
+                    return NULL;
+                }
+                buffer->data = temp;
+            }
+            buffer->data[buffer->size++] = read_buf[i];
+        }
+    }
+
+    if (bytes_read == -1) {
+        perror("Error reading text file");
+        free(buffer->data);
+        free(buffer);
+        close(fd);
+        return NULL;
+    }
+
+    close(fd);
+    return buffer;
+}
+
+LinearBuffer* read_binary_file(const char* filename) {
+    int fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        perror("Error opening binary file");
+        return NULL;
+    }
+
+    LinearBuffer *buffer = (LinearBuffer *)malloc(sizeof(LinearBuffer));
+    if (buffer == NULL) {
+        perror("Error allocating LinearBuffer");
+        close(fd);
+        return NULL;
+    }
+
+    buffer->capacity = 8192; 
+    buffer->data = (unsigned char *)malloc(buffer->capacity);
+    if (buffer->data == NULL) {
+        perror("Error allocating buffer data");
+        free(buffer);
+        close(fd);
+        return NULL;
+    }
+
+    buffer->size = 0;
+    unsigned char read_buf[4096];
+    int bytes_read;
+
+    while ((bytes_read = read(fd, read_buf, sizeof(read_buf))) > 0) {
+        if (buffer->size + bytes_read > buffer->capacity) {
+            while (buffer->capacity < buffer->size + bytes_read) {
+                buffer->capacity *= 2;
+            }
+            unsigned char *temp = (unsigned char *)realloc(buffer->data, buffer->capacity);
+            if (temp == NULL) {
+                perror("Error reallocating buffer");
+                free(buffer->data);
+                free(buffer);
+                close(fd);
+                return NULL;
+            }
+            buffer->data = temp;
+        }
+        for (int i = 0; i < bytes_read; i++) {
+            buffer->data[buffer->size++] = read_buf[i];
+        }
+    }
+
+    if (bytes_read == -1) {
+        perror("Error reading binary file");
+        free(buffer->data);
+        free(buffer);
+        close(fd);
+        return NULL;
+    }
+
+    close(fd);
+    return buffer;
+}
+
+void linear_buffer_free(LinearBuffer* buffer) {
+
+    if (buffer != NULL) {
+        free(buffer->data);
+        free(buffer);
+    }
 }
