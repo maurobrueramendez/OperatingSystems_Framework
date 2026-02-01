@@ -5,7 +5,7 @@
 #include <string.h>
 
 // parses complete CSV numbers from circular buff
-static void process_text_buffer(CircularBuffer* cb, int reachedEOF, int* printed, int* sum) {
+static void process_text_buffer(CircularBuffer* cb, int reachedEOF, int* printed, unsigned int* sum) {
     char numbuf[64];    // temp array to build number strings
     while (1) {
         int elem_size = buffer_size_next_element(cb, ',', reachedEOF);  // returns num bytes of elem, includes commas
@@ -22,7 +22,7 @@ static void process_text_buffer(CircularBuffer* cb, int reachedEOF, int* printed
         numbuf[idx] = '\0';
 
         int val = atoi(numbuf);         // converts text digits to int
-        *sum += val;
+        *sum += (unsigned int)val;
         
         // print 10 first numbers
         if (*printed < 10) {
@@ -57,7 +57,7 @@ static void handle_text_file(const char* path, int bufSize) {
 
     int printed = 0;
     int bytes_read;
-    int sum = 0;
+    unsigned int sum = 0;
 
     while ((bytes_read = (int)read(fd, chunk, (size_t)bufSize)) > 0) {
         for (int i = 0; i < bytes_read; i++) {
@@ -76,7 +76,7 @@ static void handle_text_file(const char* path, int bufSize) {
     process_text_buffer(&cb, 1, &printed, &sum);  // eof
 
     printf("\nCount: %d", printed); // print count 
-    printf("\nSum: %d", sum);     // print sum
+    printf("\nSum: %d", (int)sum);     // print sum
 
     free(chunk);
     buffer_deallocate(&cb);
@@ -107,7 +107,7 @@ static void handle_binary_file(const char* path, int bufSize) {
     int count = 0;
     int printed = 0;
     int bytes_read;
-    int sum = 0;
+    unsigned int sum = 0;
 
     // read chunks from file until eof, or until 10 printed
     while ((bytes_read = (int)read(fd, chunk, (size_t)bufSize)) > 0) {
@@ -119,7 +119,7 @@ static void handle_binary_file(const char* path, int bufSize) {
                               ((unsigned int)chunk[i+2] << 16) |
                               ((unsigned int)chunk[i+3] << 24);
             int val = (int)uval;
-            sum += val;
+            sum += (unsigned int)val;
             count++;
             if (printed < 10) {
                 printf("%d ", val);
@@ -129,7 +129,7 @@ static void handle_binary_file(const char* path, int bufSize) {
     }
 
     printf("\nCount: %d", count);
-    printf("\nSum: %d", sum);
+    printf("\nSum: %d", (int)sum);
 
     free(chunk);
     close(fd);
