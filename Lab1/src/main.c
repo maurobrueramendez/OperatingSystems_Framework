@@ -1,10 +1,11 @@
 #include "circularBuffer.h"
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
 
 // parses complete CSV numbers from circular buff
-static void process_text_buffer(CircularBuffer* cb, int reachedEOF, int* printed, long long* sum) {
+static void process_text_buffer(CircularBuffer* cb, int reachedEOF, int* printed, int* sum) {
     char numbuf[64];    // temp array to build number strings
     while (1) {
         int elem_size = buffer_size_next_element(cb, ',', reachedEOF);  // returns num bytes of elem, includes commas
@@ -56,7 +57,7 @@ static void handle_text_file(const char* path, int bufSize) {
 
     int printed = 0;
     int bytes_read;
-    long long sum = 0;
+    int sum = 0;
 
     while ((bytes_read = (int)read(fd, chunk, (size_t)bufSize)) > 0) {
         for (int i = 0; i < bytes_read; i++) {
@@ -75,7 +76,7 @@ static void handle_text_file(const char* path, int bufSize) {
     process_text_buffer(&cb, 1, &printed, &sum);  // eof
 
     printf("\nCount: %d", printed); // print count 
-    printf("\nSum: %lld", sum);     // print sum
+    printf("\nSum: %d", sum);     // print sum
 
     free(chunk);
     buffer_deallocate(&cb);
@@ -106,7 +107,7 @@ static void handle_binary_file(const char* path, int bufSize) {
     int count = 0;
     int printed = 0;
     int bytes_read;
-    long long sum = 0;
+    int sum = 0;
 
     // read chunks from file until eof, or until 10 printed
     while ((bytes_read = (int)read(fd, chunk, (size_t)bufSize)) > 0) {
@@ -128,7 +129,7 @@ static void handle_binary_file(const char* path, int bufSize) {
     }
 
     printf("\nCount: %d", count);
-    printf("\nSum: %lld", sum);
+    printf("\nSum: %d", sum);
 
     free(chunk);
     close(fd);
