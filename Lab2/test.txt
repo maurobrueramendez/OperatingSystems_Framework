@@ -1,0 +1,9 @@
+SINGLE
+echo hello
+PIPED
+ps aux
+grep root
+CONCURRENT
+sleep 3
+EXIT
+
