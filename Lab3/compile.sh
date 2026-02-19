@@ -1,0 +1,1 @@
+#bash file for running commands
