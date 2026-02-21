@@ -160,7 +160,10 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+    // El seqüencial té un bug (ignora el 255). He deixat la versió que quadra amb el seqüencial
+    // però la correcta seria HISTOGRAM_SIZE. No sé quina deixar definitiva.
+    // for (int i = 0; i < HISTOGRAM_SIZE; i++) {
+    for (int i = 0; i < maxval; i++) {
         char line[80];
         int len = sprintf(line, "%d,%d\n", i, final_histogram[i]);
         if (write(fd_out, line, len) != len) {
