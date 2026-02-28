@@ -116,6 +116,7 @@ void * Producer (void* arg) {
 
     if (fd < 0) { 
         perror("Producer failed to open file"); 
+        // Part 2: Ensure graceful termination even if file open fails
         //decrement active producers if file open fails
         pthread_mutex_lock(&buffer_mutex);
         active_producers--;
@@ -146,15 +147,12 @@ void * Producer (void* arg) {
             break;
         }
         
-        //Consumer part of adding to the buffer: need to 
+        //add the block to the buffer
         pthread_mutex_lock(&buffer_mutex);
         while(nBuffer == elementsInBuffer) {
             pthread_cond_wait(&cond_not_full, &buffer_mutex);
         }
-        
-        /* 
-        To complete by the student: should insert the element to the buffer
-        */
+
         buffer[buffer_in].data = buff;
         buffer[buffer_in].size = nBytesRead;
         buffer_in = (buffer_in + 1) % nBuffer;
